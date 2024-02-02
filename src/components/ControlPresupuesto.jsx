@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar'
+import "react-circular-progressbar/dist/styles.css"
 
 const ControlPresupuesto = ({presupuesto, gastos, setGastos, setPresupuesto, setIsValidate}) => {
   const [disponible, setDisponible] = useState(0)
   const [gastado, setGastado] = useState(0)
+  const [porcentaje, setPorcentaje] = useState(0)
 
   useEffect( () => {
-    console.log(gastos)
     const totalGastado = gastos.reduce((total, gasto) => total + gasto.cantidad, 0)
+    const totalDisponible = presupuesto - totalGastado;
+
+    const nuevoPorcentaje = (( ( presupuesto - totalDisponible ) / presupuesto  ) * 100).toFixed(2);
+
+    setDisponible(totalDisponible)
+    setGastado(totalGastado)
+    setTimeout(() => {
+      setPorcentaje(nuevoPorcentaje)
+    }, 1500);
   }, [gastos])
 
   const formatearPresupuesto = cantidad => {
@@ -34,8 +45,16 @@ const ControlPresupuesto = ({presupuesto, gastos, setGastos, setPresupuesto, set
   return (
     <div className="contenedor-presupuesto contenedor sombra dos-columnas">
       <div>
-        <p>Aquí va el gráfico</p>
-      </div>
+        <CircularProgressbar
+          styles={buildStyles({
+            pathColor: porcentaje > 100 ? '#DC2626' : '#3B82F6',
+            trailColor: '#F5F5F5',
+            textColor: porcentaje > 100 ? '#DC2626' : '#3B82F6',
+          })}
+          value={porcentaje}
+          text={`${porcentaje}% Gastado`}
+        />
+        </div>
 
       <div className="contenido-presupuesto">
         <input
@@ -49,12 +68,12 @@ const ControlPresupuesto = ({presupuesto, gastos, setGastos, setPresupuesto, set
           <span>Presupuesto:</span> {formatearPresupuesto(presupuesto)}
         </p>
 
-        <p >
-          <span>Disponible:</span> {formatearPresupuesto(0)}
+        <p className={`${disponible < 0 ? 'negativo' : '' }`}>
+          <span>Disponible:</span> {formatearPresupuesto(disponible)}
         </p>
 
         <p >
-          <span>Gastos:</span> {formatearPresupuesto(0)}
+          <span>Gastos:</span> {formatearPresupuesto(gastado)}
         </p>
       </div>
     </div>

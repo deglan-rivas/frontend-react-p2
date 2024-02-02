@@ -1,20 +1,33 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import btnCerrar from '../img/cerrar.svg'
 import Mensaje from './Mensaje'
-import { generarId } from '../helpers'
 
 const Modal = ({
       setModal, 
       setAnimarModal, 
       animarModal,
-      setGastos,
-      gastos
+      guardarGasto, 
+      gastoEditar,
+      setGastoEditar
     }) => {
+
+  useEffect(() => {
+    if( Object.keys(gastoEditar).length > 0 ) {
+      setNombre(gastoEditar.nombre)
+      setCantidad(gastoEditar.cantidad)
+      setCategoria(gastoEditar.categoria)
+      setId(gastoEditar.id)
+      setFecha(gastoEditar.fecha)
+    }
+  }, []);
+
   const [nombre, setNombre] = useState('')
   const [cantidad, setCantidad] = useState(0)
   const [categoria, setCategoria]  = useState('')
   const [mensaje, setMensaje] = useState('')
+  const [fecha, setFecha] = useState('')
+  const [id, setId] = useState('')
 
   const handleSubmit = e => {
     e.preventDefault()
@@ -26,21 +39,25 @@ const Modal = ({
         setMensaje('')
       }, 3000);
       return
+    } 
+
+    if (cantidad <= 0) {
+      setMensaje('el gasto ingresado no es válido')
+
+      setTimeout(() => {
+        setMensaje('')
+      }, 3000);
+      return
     }
 
     setMensaje('')
-    setGastos([...gastos, {
-      nombre, 
-      cantidad, 
-      categoria, 
-      id: generarId(), 
-      fecha: Date.now() 
-    }])
-    handleCloseModal()
+    guardarGasto({nombre, cantidad, categoria, id, fecha})
+    // handleCloseModal()
   }
 
   const handleCloseModal = () => {
     setAnimarModal(false)
+    setGastoEditar({})
     setTimeout(() => {
       setModal(false)
     }, 500);
@@ -60,7 +77,7 @@ const Modal = ({
         onSubmit={handleSubmit}
       >
         <legend>
-          Nuevo Gasto
+          {gastoEditar.nombre ? 'Editar Gasto' : 'Nuevo Gasto'}
         </legend>
 
         {mensaje && 
@@ -104,7 +121,7 @@ const Modal = ({
             <option value="ahorro">Ahorro</option>
             <option value="comida">Comida</option>
             <option value="casa">Casa</option>
-            <option value="gastos">Gastos</option>
+            <option value="gastos">Gastos Variados (Otros)</option>
             <option value="ocio">Ocio</option>
             <option value="salud">Salud</option>
             <option value="suscripciones">Suscripciones</option>
@@ -113,7 +130,7 @@ const Modal = ({
 
         <input 
           type="submit" 
-          value="Añadir Gasto"
+          value={gastoEditar.nombre ? 'Guardar Cambios' : 'Añadir Gasto'}
         />
       </form>
     </div>
