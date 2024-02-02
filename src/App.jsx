@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from './components/Header'
 import IconoNuevoGasto from './img/nuevo-gasto.svg'
 import Modal from './components/Modal'
@@ -7,7 +7,9 @@ import ListadoGastos from './components/ListadoGastos'
 import Filtro from './components/Filtro'
 
 function App() {
-  const [presupuesto, setPresupuesto] = useState(0)
+  const [presupuesto, setPresupuesto] = useState(
+    localStorage.getItem('presupuesto') ?? 0
+  )
   const [isValidate, setIsValidate] = useState(false)
 
   const [isModalShown, setModal] = useState(false)
@@ -15,7 +17,9 @@ function App() {
 
   const [filtro, setFiltro] = useState('')
 
-  const [gastos, setGastos] = useState([])
+  const [gastos, setGastos] = useState(
+    JSON.parse(localStorage.getItem('gastos')) ?? []
+  )
   const [gasto, setGasto] = useState({})
 
   const handleModal = () => {
@@ -26,6 +30,22 @@ function App() {
     }, 500);
   }
 
+  useEffect(() => {
+    localStorage.setItem('presupuesto', presupuesto ?? 0)
+  }, [presupuesto])
+
+  useEffect(() => {
+    localStorage.setItem('gastos', JSON.stringify(gastos ?? []) )
+  }, [gastos])
+
+  useEffect(() => {
+    const presupuestoLS = Number(localStorage.getItem('presupuesto')) ?? 0;
+
+    if(presupuestoLS > 0 ) {
+      setIsValidate(true)
+    }
+  }, []);
+
   return (
     <div className={isModalShown && 'fijar'}>
       <Header
@@ -34,6 +54,7 @@ function App() {
         isValidate = {isValidate}
         setIsValidate = {setIsValidate}
         gastos = {gastos}
+        setGastos = {setGastos}
       />
 
       {isValidate && (
@@ -44,7 +65,7 @@ function App() {
               filtro={filtro}
               setFiltro={setFiltro}
             />
-            
+
             <ListadoGastos
               gastos = {gastos}
             />
@@ -70,13 +91,13 @@ function App() {
         />
       )}
 
-      {/* {gastos && gastos.map( (gastoState) => {
-        return <Gasto
-          gastoState = {gastoState}
-        />
-      })} */}
     </div>
   )
 }
 
+// {gastos && gastos.map( (gastoState) => {
+//   return <Gasto
+//     gastoState = {gastoState}
+//   />
+// })}
 export default App

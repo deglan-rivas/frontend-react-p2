@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const ControlPresupuesto = ({presupuesto, gastos}) => {
+const ControlPresupuesto = ({presupuesto, gastos, setGastos, setPresupuesto, setIsValidate}) => {
   const [disponible, setDisponible] = useState(0)
   const [gastado, setGastado] = useState(0)
 
@@ -21,6 +21,16 @@ const ControlPresupuesto = ({presupuesto, gastos}) => {
     })
   }
 
+  const handleResetApp = () => {
+    const confirmation = confirm('Seguro que desea reiniciar sus gastos? Esta acción es irreversible')
+
+    if (confirmation) {
+      setGastos([])
+      setIsValidate(false)
+      setPresupuesto(0)
+    }
+  }
+
   return (
     <div className="contenedor-presupuesto contenedor sombra dos-columnas">
       <div>
@@ -32,7 +42,7 @@ const ControlPresupuesto = ({presupuesto, gastos}) => {
           className="reset-app"
           type="button"
           value='resetear app'
-          // onClick={handleResetApp}
+          onClick={handleResetApp}
         />
                   
         <p >
