@@ -1,0 +1,27 @@
+name: Deploy to EC2
+
+on:
+  workflow_run:
+    workflows: ["Build and Publish Docker Image in Dockerhub"]
+    types:
+      - completed
+
+jobs:
+  deploy-to-ec2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Executing remote command into EC2 by SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}:latest || true 
+            docker stop ${{ vars.CONTAINER_NAME }} || true 
+            docker run --rm -d -p ${{ vars.PORT_MAPPING }} --name ${{ vars.CONTAINER_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}:latest
